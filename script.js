@@ -372,6 +372,211 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     animateElementsInView()
   }, 500)
+
+  // Initialize FAQ accordion
+  const faqItems = document.querySelectorAll(".faq-item")
+  faqItems.forEach((item) => {
+    const questionBtn = item.querySelector(".faq-question")
+    const answer = item.querySelector(".faq-answer")
+
+    if (questionBtn && answer) {
+      questionBtn.addEventListener("click", () => {
+        const isOpen = item.classList.contains("open")
+
+        // Close any other open item (accordion behavior)
+        document.querySelectorAll(".faq-item.open").forEach((openItem) => {
+          if (openItem !== item) {
+            openItem.classList.remove("open")
+            const openAnswer = openItem.querySelector(".faq-answer")
+            if (openAnswer) openAnswer.style.maxHeight = null
+            const openBtn = openItem.querySelector(".faq-question")
+            if (openBtn) openBtn.setAttribute("aria-expanded", "false")
+            if (openAnswer) openAnswer.setAttribute("aria-hidden", "true")
+            const icon = openBtn?.querySelector('i')
+            if (icon) { icon.classList.remove('fa-minus'); icon.classList.add('fa-plus') }
+          }
+        })
+
+        // Toggle current item
+        if (isOpen) {
+          item.classList.remove("open")
+          answer.style.maxHeight = null
+          questionBtn.setAttribute("aria-expanded", "false")
+          answer.setAttribute("aria-hidden", "true")
+          const icon = questionBtn.querySelector('i')
+          if (icon) { icon.classList.remove('fa-minus'); icon.classList.add('fa-plus') }
+        } else {
+          item.classList.add("open")
+          answer.style.maxHeight = answer.scrollHeight + "px"
+          questionBtn.setAttribute("aria-expanded", "true")
+          answer.setAttribute("aria-hidden", "false")
+          const icon = questionBtn.querySelector('i')
+          if (icon) { icon.classList.remove('fa-plus'); icon.classList.add('fa-minus') }
+        }
+      })
+    }
+  })
+
+  // On initial load, show the section matching the first navbar item
+  if (!window.location.hash) {
+    const firstNav = document.querySelector('.nav-links a')
+    if (firstNav) {
+      const targetId = firstNav.getAttribute('href')
+      const targetSection = targetId ? document.querySelector(targetId) : null
+      if (targetSection) {
+        window.scrollTo({ top: targetSection.offsetTop - 80, behavior: 'auto' })
+        // Update active state
+        document.querySelectorAll('.nav-links a').forEach((l) => l.classList.remove('active'))
+        firstNav.classList.add('active')
+      }
+    }
+  }
+
+  // Services modal data and interactions
+  const servicesData = [
+    {
+      key: "lidar",
+      title: "LiDAR Drone Survey",
+      description:
+        "High-precision LiDAR scanning for terrain modeling, volumetric analysis, and infrastructure planning.",
+      features: [
+        "Terrain and corridor mapping",
+        "Point cloud classification",
+        "DEM/DSM generation",
+        "Cut/Fill and volume analytics",
+      ],
+      icon: "https://img.icons8.com/ios-filled/100/ffffff/drone.png",
+    },
+    {
+      key: "gnss",
+      title: "DGPS/GNSS Mapping",
+      description:
+        "Centimeter-level positioning for geodetic control, cadastral mapping, and construction layout.",
+      features: [
+        "Static and RTK surveys",
+        "Geodetic control establishment",
+        "Cadastral boundary surveys",
+        "Construction set-out",
+      ],
+      icon: "https://img.icons8.com/ios-filled/100/ffffff/satellite.png",
+    },
+    {
+      key: "road",
+      title: "Road & Bridge Surveys",
+      description:
+        "Topographic, alignment, and cross-section surveys supporting transport infrastructure design.",
+      features: [
+        "Alignment and profile",
+        "Cross-sections",
+        "As-built documentation",
+        "Hydraulic inputs",
+      ],
+      icon: "https://img.icons8.com/ios-filled/100/ffffff/road.png",
+    },
+    {
+      key: "hydro",
+      title: "Hydropower & Irrigation",
+      description:
+        "Hydrological mapping, canal cross-sections, and reservoir capacity assessments.",
+      features: [
+        "Canal cross-sections",
+        "Reservoir capacity",
+        "Intake and outlet surveys",
+        "Transmission corridor",
+      ],
+      icon: "https://img.icons8.com/ios-filled/100/ffffff/water.png",
+    },
+    {
+      key: "land",
+      title: "Land Resource Mapping",
+      description:
+        "Comprehensive land use, zoning, and environmental mapping for planning and development.",
+      features: [
+        "Land use/land cover",
+        "Zoning and planning inputs",
+        "GIS datasets and maps",
+        "Change detection",
+      ],
+      icon: "https://img.icons8.com/ios-filled/100/ffffff/marker.png",
+    },
+    {
+      key: "layout",
+      title: "Construction Layout",
+      description:
+        "Accurate setting out of reference points, grades, and elevations for on-site execution.",
+      features: [
+        "Reference points and benchmarks",
+        "Grid and elevation set-out",
+        "Quality checks and as-built",
+        "Progress verification",
+      ],
+      icon: "https://img.icons8.com/ios-filled/100/ffffff/compass.png",
+    },
+  ]
+
+  const serviceCards = document.querySelectorAll(".services .service-card")
+  const serviceModal = document.getElementById("service-modal")
+  const serviceModalClose = document.getElementById("service-modal-close")
+  const serviceModalTitle = document.getElementById("service-modal-title")
+  const serviceModalDescription = document.getElementById("service-modal-description")
+  const serviceModalFeatures = document.getElementById("service-modal-features")
+  const serviceModalIcon = document.getElementById("service-modal-icon")
+
+  function openServiceModal(index) {
+    const data = servicesData[index]
+    if (!data || !serviceModal) return
+
+    serviceModalTitle.textContent = data.title
+    serviceModalDescription.textContent = data.description
+    serviceModalFeatures.innerHTML = ""
+    data.features.forEach((f) => {
+      const li = document.createElement("li")
+      li.textContent = f
+      serviceModalFeatures.appendChild(li)
+    })
+    serviceModalIcon.innerHTML = `<img src="${data.icon}" alt="${data.title} icon" />`
+
+    serviceModal.style.display = "block"
+    document.body.style.overflow = "hidden"
+  }
+
+  function closeServiceModal() {
+    if (!serviceModal) return
+    serviceModal.style.display = "none"
+    document.body.style.overflow = "auto"
+  }
+
+  serviceCards.forEach((card, index) => {
+    card.style.cursor = "pointer"
+    card.addEventListener("click", () => openServiceModal(index))
+  })
+
+  if (serviceModalClose) {
+    serviceModalClose.addEventListener("click", closeServiceModal)
+  }
+
+  if (serviceModal) {
+    serviceModal.addEventListener("click", (e) => {
+      if (e.target === serviceModal) closeServiceModal()
+    })
+  }
+
+  // Get a Quote button: close modal, then show contact form
+  const quoteBtn = document.querySelector('#service-modal .modal-actions .primary-btn')
+  if (quoteBtn) {
+    quoteBtn.addEventListener('click', (e) => {
+      e.preventDefault()
+      closeServiceModal()
+      const contactSection = document.querySelector('#contact')
+      if (contactSection) {
+        window.scrollTo({ top: contactSection.offsetTop - 80, behavior: 'smooth' })
+        // Update active nav link to Contact
+        document.querySelectorAll('.nav-links a').forEach((l) => l.classList.remove('active'))
+        const contactLink = document.querySelector('.nav-links a[href="#contact"]')
+        if (contactLink) contactLink.classList.add('active')
+      }
+    })
+  }
 })
 
 // Back to top button
@@ -424,3 +629,127 @@ if ("IntersectionObserver" in window) {
     imageObserver.observe(img)
   })
 }
+
+// ===== CLIENTS SLIDER =====
+document.addEventListener("DOMContentLoaded", () => {
+  const slider = document.querySelector('.clients-slider')
+  if (!slider) return
+
+  const viewport = slider.querySelector('.clients-viewport')
+  const track = slider.querySelector('.clients-track')
+  const slides = Array.from(slider.querySelectorAll('.clients-slide'))
+  const prevBtn = slider.querySelector('.clients-nav.prev')
+  const nextBtn = slider.querySelector('.clients-nav.next')
+  const dotsContainer = slider.querySelector('.clients-dots')
+
+  let currentIndex = 0
+  let slidesPerView = 5
+  let autoplayTimer = null
+  const autoplayMs = 2200
+
+  function computeSlidesPerView() {
+    const width = window.innerWidth
+    if (width <= 480) return 1
+    if (width <= 768) return 2
+    if (width <= 992) return 3
+    if (width <= 1200) return 4
+    return 5
+  }
+
+  function updateDots() {
+    if (!dotsContainer) return
+    const totalPages = Math.ceil(slides.length / slidesPerView)
+    dotsContainer.innerHTML = ''
+    for (let i = 0; i < totalPages; i++) {
+      const dot = document.createElement('button')
+      dot.className = 'clients-dot' + (i === Math.floor(currentIndex / slidesPerView) ? ' active' : '')
+      dot.setAttribute('aria-label', `Go to slide ${i + 1}`)
+      dot.addEventListener('click', () => {
+        currentIndex = i * slidesPerView
+        snapToIndex()
+        restartAutoplay()
+      })
+      dotsContainer.appendChild(dot)
+    }
+  }
+
+  function snapToIndex() {
+    const slideWidth = slides[0]?.getBoundingClientRect().width || 0
+    const gap = parseFloat(getComputedStyle(track).gap || '0')
+    const translateX = -(currentIndex * (slideWidth + gap))
+    track.style.transform = `translate3d(${translateX}px, 0, 0)`
+    updateDots()
+  }
+
+  function next() {
+    const maxIndex = Math.max(0, slides.length - slidesPerView)
+    currentIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1
+    snapToIndex()
+  }
+
+  function prev() {
+    const maxIndex = Math.max(0, slides.length - slidesPerView)
+    currentIndex = currentIndex <= 0 ? maxIndex : currentIndex - 1
+    snapToIndex()
+  }
+
+  function restartAutoplay() {
+    stopAutoplay()
+    autoplayTimer = setInterval(next, autoplayMs)
+  }
+
+  function stopAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer)
+    autoplayTimer = null
+  }
+
+  // Resize handling
+  function handleResize() {
+    const prevSpv = slidesPerView
+    slidesPerView = computeSlidesPerView()
+    if (slidesPerView !== prevSpv) {
+      currentIndex = Math.floor(currentIndex / slidesPerView) * slidesPerView
+      snapToIndex()
+    } else {
+      snapToIndex()
+    }
+  }
+
+  // Buttons
+  prevBtn?.addEventListener('click', () => { prev(); restartAutoplay() })
+  nextBtn?.addEventListener('click', () => { next(); restartAutoplay() })
+
+  // Hover pause
+  viewport?.addEventListener('mouseenter', stopAutoplay)
+  viewport?.addEventListener('mouseleave', restartAutoplay)
+
+  // Touch swipe
+  let startX = 0
+  let isDragging = false
+  viewport?.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX
+    isDragging = true
+    stopAutoplay()
+  }, { passive: true })
+
+  viewport?.addEventListener('touchmove', (e) => {
+    if (!isDragging) return
+    const delta = e.touches[0].clientX - startX
+    if (Math.abs(delta) > 40) {
+      if (delta < 0) next(); else prev()
+      isDragging = false
+    }
+  }, { passive: true })
+
+  viewport?.addEventListener('touchend', () => {
+    isDragging = false
+    restartAutoplay()
+  })
+
+  // Init
+  slidesPerView = computeSlidesPerView()
+  updateDots()
+  snapToIndex()
+  restartAutoplay()
+  window.addEventListener('resize', handleResize)
+})
